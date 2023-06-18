@@ -20,7 +20,8 @@ public class CourseUtil {
 
     public static Courses getCourses()
     {
-        int quantity = Console.readInt("quantity:");
+        Console.writeLine("You can try more schedule, please enter your input values!..");
+        int quantity = Console.readInt("Quantity:");
         var prerequisites = new ArrayList<String>();
         int i = 0;
         while(true){

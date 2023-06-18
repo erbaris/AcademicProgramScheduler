@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.erbaris</groupId>
 	<artifactId>AcademicProgramScheduler</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>AcademicProgramScheduler</name>
 	<description>Academic Program Scheduler</description>
 

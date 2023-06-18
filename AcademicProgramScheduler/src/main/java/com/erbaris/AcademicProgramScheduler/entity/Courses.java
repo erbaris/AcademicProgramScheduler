@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------
 	FILE        : Course.java
 	AUTHOR		: Baris Er
-	LAST UPDATE	: 17.06.2023
+	LAST UPDATE	: 18.06.2023
 
 	Courses order calculation class
 
@@ -33,12 +33,12 @@ public class Courses {
             resultList.add(i);
         }
 
-        // get preperequisite table in ArrayList<int[]>
+        // get prerequisite table in ArrayList<int[]>
         var relations = getCourseRelations();
 
-        // check each element prerequsite and change its place if it is needed.
+        // check each element prerequisite and change its place if it is needed.
         for(int i = 0; i < courseQuantity; i++){
-            // get Prerequsite table for current element as Optional.
+            // get Prerequisite table for current element as Optional.
             var preTmpList = getPrerequisiteOptArr(i, relations);
             if(preTmpList.isEmpty())
                 continue;
@@ -82,7 +82,7 @@ public class Courses {
         int count = 0;
         if(i == 0)
             return;
-        // check before elements prerequsite list for the elements i
+        // check before elements prerequisite list for the elements i
         for(int j = 0; j < i; j++){
             var preList = getPrerequisiteOptArr(j, relations);
             if(preList.isEmpty())
@@ -91,9 +91,9 @@ public class Courses {
             for(int k = 1; k < preArr.length; k++){
                 if(preArr[k] == i)
                     // if this element exists and idx is smaller, that elements should be moved.
-                    // count is for keep narutal order if more than 1 elements move
-                    if(resultList.indexOf((Object)i) > resultList.indexOf((Object)j))
-                        replaceOrder(j, resultList.indexOf((Object)i) + count++, resultList, relations);
+                    // count is for keep natural order if more than 1 elements move
+                    if(resultList.indexOf(i) > resultList.indexOf(j))
+                        replaceOrder(j, resultList.indexOf(i) + count++, resultList, relations);
             }
         }
 
@@ -105,7 +105,7 @@ public class Courses {
         if(nextPrerequisiteList.isEmpty())
             return false;
         var prerequisiteArr = nextPrerequisiteList.get();
-        // check that prerequsite table contain the element i
+        // check that prerequisite table contain the element i
         for(int j = 1; j < prerequisiteArr.length; j++)
             if(prerequisiteArr[j] == i)
                 return true;
@@ -149,5 +149,102 @@ public class Courses {
                 result[j++] = Integer.parseInt(String.valueOf(c));
         }
         return result;
+    }
+
+
+    /// *** BELOW IS SECOND FAST SOLUTION *** ///
+
+    public String getScheduleFast()
+    {
+        // Create an empty list
+        var resultList = new ArrayList<Integer>(courseQuantity);
+
+        // get prerequisite table in ArrayList<int[]>
+        var relations = getCourseRelations();
+
+        resultList.add(0);
+
+        for(int i = 1; i < courseQuantity; i++) {
+            var minMaxIdx = findMinMaxIdx(i, relations, resultList, true);
+            var idx = findIdxAccNaturalOrder(i, minMaxIdx[0], minMaxIdx[1], resultList);
+            resultList.add(idx, i);
+        }
+
+        naturalOrderCheck(relations, resultList);
+
+        // create result as requested String format
+        var result = new StringBuilder();
+        resultList.forEach(s -> result.append(s).append(" "));
+        return result.toString().trim();
+    }
+    private void replaceOrderWithoutCheck(int i, int newIdx, ArrayList<Integer> resultList)
+    {
+        // remove element
+        resultList.remove((Object)i);
+        // add the elements requested place
+        resultList.add(newIdx, i);
+    }
+
+    private int[] findMinMaxIdx(int i, ArrayList<int[]> relations, ArrayList<Integer> resultList, boolean accordingToPreviousElement)
+    {
+        // get Prerequisite table for current element as Optional.
+        var preTmpList = getPrerequisiteOptArr(i, relations);
+        int minIdx = 0;
+        int maxIdx = resultList.size();
+
+        // find minIdx according to i's Prerequisite
+        if(preTmpList.isPresent())
+            for(int p : preTmpList.get()){
+                if (p == i)
+                    continue;
+                int tmpIdx = resultList.indexOf(p);
+                if(tmpIdx != -1 && minIdx < tmpIdx)
+                    minIdx = tmpIdx;
+            }
+
+        var limit = courseQuantity;
+        if(accordingToPreviousElement)
+            limit = i;
+
+        // find maxIdx according to previous elements' Prerequisite
+        for(int j = 0; j < limit; j++){
+            var preList = getPrerequisiteOptArr(j, relations);
+            if(preList.isEmpty())
+                continue;
+            var preArr = preList.get();
+            for(int k = 1; k < preArr.length; k++){
+                if(preArr[k] == i){
+                    int tmpIdx = resultList.indexOf(j);
+                    if( tmpIdx < maxIdx)
+                        maxIdx = tmpIdx;
+                }
+            }
+        }
+        return new int[] {minIdx, maxIdx};
+    }
+
+    private int findIdxAccNaturalOrder(int i, int minIdx, int maxIdx, ArrayList<Integer> resultList)
+    {
+        // find place according to natural order
+        int Idx = maxIdx;
+        for(int j = minIdx; j < maxIdx; j++){
+            if(i < resultList.get(j))
+                Idx = j;
+        }
+        return Idx;
+    }
+
+    private void naturalOrderCheck(ArrayList<int[]> relations, ArrayList<Integer> resultList)
+    {
+        for(int i= 0; i < courseQuantity; i++){
+            var minMaxIdx = findMinMaxIdx(i, relations, resultList, false);
+            for (int j = minMaxIdx[0] + 1; j < minMaxIdx[1]; j++)
+                if (i < resultList.get(j)) {
+                    if(resultList.get(j - 1) != i)
+                        replaceOrderWithoutCheck(i, j, resultList);
+                    break;
+                }
+        }
+
     }
 }
