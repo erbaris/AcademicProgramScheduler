@@ -12,6 +12,7 @@ package com.erbaris.AcademicProgramScheduler.entity;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 
@@ -141,12 +142,12 @@ public class Courses {
     }
     private int[] getCourseInt(String str)
     {
-        int[] result = new int[str.length() / 2 + 1];
-        var tmp = str.toCharArray();
-        int j = 0;
-        for (char c : tmp) {
-            if (!Character.isWhitespace(c))
-                result[j++] = Integer.parseInt(String.valueOf(c));
+        ArrayList<Integer> resultList = new ArrayList<>();
+        Arrays.stream(str.split(" ")).map(Integer::parseInt).forEach(resultList::add);
+
+        var result = new int[resultList.size()];
+        for (int i = 0; i < result.length; i++){
+            result[i] = resultList.get(i);
         }
         return result;
     }
